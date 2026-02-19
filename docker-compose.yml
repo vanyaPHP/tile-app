@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tile_app
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    environment:
+      - APP_PORT=${APP_PORT:-80}
+    depends_on:
+      - db
+      - manticore
+
+  nginx:
+    image: nginx:alpine
+    container_name: tile_nginx
+    ports:
+      - "${APP_PORT:-80}:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: tile_db
+    environment:
+      MYSQL_DATABASE: tile_app
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+
+  manticore:
+    image: manticoresearch/manticore:latest
+    container_name: tile_manticore
+    ports:
+      - "9308:9308"
+    volumes:
+      - ./manticore.conf:/etc/manticoresearch/manticore.conf
+    depends_on:
+      - db
+
+volumes:
+  db_data:
