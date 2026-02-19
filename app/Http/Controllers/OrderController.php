@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Order\GetOrdersStatsData;
 use App\Http\Requests\Order\GetPriceRequestData;
+use App\Http\Requests\Order\SearchRequestData;
 use App\Http\Resources\Order\OrderResource;
 use App\Models\Order;
 use App\Repositories\OrderRepository;
 use App\Services\ScrapperService;
+use App\Services\SearchService;
 use Illuminate\Http\JsonResponse;
 
 class OrderController
@@ -48,12 +50,19 @@ class OrderController
 
     public function show(int $id): JsonResponse
     {
-        $order = Order::with(['articles'])->find($id);
+        $order = Order::with(['articles'])->findOrFail($id);
 
-        if (!$order) {
-            return response()->json(['error' => 'Order not found'], 404);
+        return response()->json(new OrderResource($order);
+    }
+
+    public function search(SearchRequestData $requestData, SearchService $searchService): JsonResponse
+    {
+        $result = $searchService->searchOrders($requestData->search);
+
+        if (array_key_exists('error', $result)) {
+            return response()->json($result, 400);
         }
 
-        return new OrderResource($order);
+        return response()->json($result);
     }
 }

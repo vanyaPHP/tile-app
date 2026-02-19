@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class OrderRepository
@@ -14,5 +15,13 @@ class OrderRepository
             ->select(DB::raw("DATE_FORMAT(create_date, '$dateFormat') as period"), DB::raw('COUNT(*) as count'))
             ->groupBy('period')
             ->orderBy('period', 'desc');
+    }
+
+    public function getByIds(array $ids, array $relations = []): Collection
+    {
+        return Order::query()
+            ->with($relations)
+            ->whereIn('id', $ids)
+            ->get();
     }
 }
