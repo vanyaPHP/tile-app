@@ -93,7 +93,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $delivery_apartment_office Квартира/офис
  *
  * @property-read Collection<int, OrderArticle> $articles
- * @property-read int|null $articles_count
  */
 class Order extends Model
 {
