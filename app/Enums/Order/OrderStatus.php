@@ -4,5 +4,6 @@ namespace App\Enums\Order;
 
 enum OrderStatus: int
 {
-    case CREATED = 1;
+    case NEW = 1;
+    case PROCESSING = 2;
 }

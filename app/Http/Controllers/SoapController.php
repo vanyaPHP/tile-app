@@ -40,7 +40,7 @@ class SoapController
             return response()->json([
                 'order_id' => $order->id,
                 'message' => 'Order created successfully',
-            ], 201);
+            ]);
         } catch (ValidationException $e) {
             $errors = implode(', ', $e->errors());
             throw new \SoapFault('Client', "Validation Failed: $errors");
