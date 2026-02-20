@@ -95,8 +95,6 @@ return new class extends Migration
             $table->date('full_payment_date')->nullable()->comment('Дата полной оплаты заказа');
             $table->longText('bank_details')->nullable()->comment('Реквизиты банка для возврата средств');
             $table->string('delivery_apartment_office', 30)->nullable()->comment('Квартира/офис');
-
-            $table->fullText(['client_name', 'client_surname', 'email', 'company_name']);
         });
 
         Schema::create('orders_article', function (Blueprint $table) {

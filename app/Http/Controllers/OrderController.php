@@ -28,14 +28,12 @@ class OrderController
 
     public function getStats(GetOrdersStatsData $requestData, OrderRepository $orderRepository): JsonResponse
     {
-        $query = $orderRepository->getGroupedByPeriodWithCount($requestData->getDateFormat());
+        $data = $orderRepository->getGroupedByPeriodWithCount($requestData->getDateFormat());
 
-        $groupsCount = (clone $query)->get()->count();
+        $groupsCount = $data->count();
         $pagesCount = (int) ceil($groupsCount / $requestData->perPage);
-        $orders = $query->with(['articles'])
-            ->offset(($requestData->page - 1) * $requestData->perPage)
-            ->limit($requestData->perPage)
-            ->get();
+        $orders = $data->skip(($requestData->page - 1) * $requestData->perPage)
+            ->take($requestData->perPage);
 
         return response()->json([
             'meta' => [
@@ -44,7 +42,7 @@ class OrderController
                 'total_pages' => $pagesCount,
                 'total_groups' => $groupsCount,
             ],
-            'data' => OrderResource::collection($orders),
+            'data' => $orders,
         ]);
     }
 
@@ -52,7 +50,7 @@ class OrderController
     {
         $order = Order::with(['articles'])->findOrFail($id);
 
-        return response()->json(new OrderResource($order);
+        return response()->json(['data' => new OrderResource($order)]);
     }
 
     public function search(SearchRequestData $requestData, SearchService $searchService): JsonResponse

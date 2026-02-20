@@ -7,8 +7,9 @@ use App\Enums\Order\DeliveryCalculateType;
 use App\Enums\Order\DeliveryType;
 use App\Enums\Order\OffsetReason;
 use App\Enums\Order\PayType;
-use App\Enums\Order\Status;
+use App\Enums\Order\OrderStatus;
 use App\Enums\Order\VatType;
+use Database\Factories\OrderFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +22,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $user_id
  * @property string $token уникальный хеш пользователя
  * @property string|null $number Номер заказа
- * @property Status $status Статус заказа
+ * @property OrderStatus $status Статус заказа
  * @property string|null $email контактный E-mail
  * @property VatType $vat_type Частное лицо или плательщик НДС
  * @property string|null $vat_number НДС-номер
@@ -96,6 +97,7 @@ use Illuminate\Support\Carbon;
  */
 class Order extends Model
 {
+    /** @use HasFactory<OrderFactory> */
     use HasFactory;
 
     protected $table = 'orders';
@@ -105,7 +107,7 @@ class Order extends Model
     const UPDATED_AT = 'update_date';
 
     protected $casts = [
-        'status' => Status::class,
+        'status' => OrderStatus::class,
         'discount' => 'integer',
         'vat_type' => VatType::class,
         'delivery_type' => DeliveryType::class,

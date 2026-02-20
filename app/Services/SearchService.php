@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Http\Resources\Order\OrderResource;
 use App\Repositories\OrderRepository;
-use GuzzleHttp\Client;
+use Manticoresearch\Client;
 
 class SearchService
 {

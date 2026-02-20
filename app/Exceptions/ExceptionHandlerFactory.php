@@ -14,6 +14,7 @@ class ExceptionHandlerFactory
         /** @var ExceptionHandlerInterface|null $handler */
         $handler = match (true) {
             $e instanceof ModelNotFoundException => new ModelNotFoundExceptionHandler(),
+            default => null,
         };
 
         return $handler?->handle($e);

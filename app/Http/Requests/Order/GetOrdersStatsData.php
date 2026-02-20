@@ -26,9 +26,9 @@ class GetOrdersStatsData extends Data
     public function getDateFormat(): string
     {
         return match($this->groupBy) {
-            'day' => '%Y-%m-%d',
-            'month' => '%Y-%m',
-            'year' => '%Y'
+            'day' => 'Y-m-d',
+            'month' => 'Y-m',
+            'year' => 'Y'
         };
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Enums\Order;
 
-enum Status: int
+enum OrderStatus: int
 {
     case CREATED = 1;
 }

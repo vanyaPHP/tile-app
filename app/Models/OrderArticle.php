@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderArticle\MultiplePalletType;
+use Database\Factories\OrderArticleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,9 +33,12 @@ use Illuminate\Support\Carbon;
  */
 class OrderArticle extends Model
 {
+    /** @use HasFactory<OrderArticleFactory> */
     use HasFactory;
 
     protected $table = 'orders_article';
+
+    public $timestamps = false;
 
     protected $casts = [
         'amount' => 'decimal:3',
