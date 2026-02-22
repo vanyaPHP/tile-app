@@ -1,59 +1,218 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Tile Expert API
+Документация к REST/SOAP API на базе Laravel для управления заказами, парсинга цен и статистики.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Приложение будет доступно по адресу: http://localhost:8080
+Эндпоинты API
 
-## About Laravel
+1. Получение цены (Парсинг)
+Получает актуальную цену плитки с сайта tile.expert.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Endpoint: GET /api/orders/price
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Параметры (Query):
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+"factory": string, обязательный -	Название фабрики (например, marca-corona)
 
-## Learning Laravel
+"collection": string, обязательный, Название коллекции (например, arteseta)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+"article": string, обязательный, Артикул (например, k263-arteseta-camoscio-s000628660)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Пример запроса:
 
-## Laravel Sponsors
+curl "http://localhost:8080/api/price?factory=marca-corona&collection=arteseta&article=k263-arteseta-camoscio-s000628660"
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Пример ответа (200 OK):
 
-### Premium Partners
+json
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+{
+  "price": 59.99,
+  "factory": "marca-corona",
+  "collection": "arteseta",
+  "article": "k263-arteseta-camoscio-s000628660"
+}
 
-## Contributing
+2. Статистика заказов
+Возвращает количество заказов, сгруппированных по дате (день/месяц/год), с поддержкой пагинации.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Endpoint: GET /api/orders/stats
 
-## Code of Conduct
+Параметры (Query):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+group_by: string, обязательный, тип группировки: day, month, year
 
-## Security Vulnerabilities
+page: integer, необязательный, номер страницы (по умолчанию 1)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+per_page: integer, необязательный, количество элементов на странице (по умолчанию 10, max 100)
 
-## License
+Пример запроса:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+bash
+
+curl "http://localhost:8080/api/orders/stats?group_by=month&page=1&per_page=5"
+
+Пример ответа (200 OK):
+
+json
+
+{
+  "meta": {
+    "page": 1,
+    "per_page": 5,
+    "total_pages": 3,
+    "total_groups": 12
+  },
+  "data": [
+    {
+      "period": "2023-03",
+      "count": 15
+    },
+    {
+      "period": "2023-02",
+      "count": 8
+    }
+  ]
+}
+
+3. Поиск заказов
+Полнотекстовый поиск по заказам (использует Manticore Search).
+
+Endpoint: GET /api/orders/search
+
+Параметры (Query):
+
+search:	string, обязательный, поисковый запрос (имя клиента, email, компания)
+
+Пример запроса:
+
+bash
+
+curl "http://localhost:8080/api/search?q=Ivan"
+
+Пример ответа (200 OK):
+
+json
+
+{
+  "query": "Ivan",
+  "count": 1,
+  "results": [
+    {
+      "id": 1,
+      "client_name": "Ivan",
+      "email": "ivan@example.com",
+      "status": 1
+    }
+  ]
+}
+
+4. Получение заказа
+Получение детальной информации о конкретном заказе вместе с артикулами.
+
+Endpoint: GET /api/orders/{id}
+
+Параметры (URL):
+
+id: integer, ID заказа
+
+Пример запроса:
+
+bash
+
+curl "http://localhost:8080/api/orders/1"
+
+Пример ответа (200 OK):
+
+
+json
+
+{
+  "data": {
+    "id": 1,
+    "hash": "...",
+    "name": "Order Name",
+    "status": 1,
+    "client": {
+      "name": "Ivan",
+      "surname": "Petrov",
+      "email": "ivan@example.com"
+    },
+    "delivery": {
+      "city": "Rome",
+      "cost": 50.00
+    },
+    "articles": [
+      {
+        "id": 10,
+        "amount": 10.500,
+        "price": 25.99
+      }
+    ]
+  }
+}
+
+5. Создание заказа (SOAP)
+Создание заказа через SOAP запрос в режиме non-WSDL.
+
+Endpoint: POST /api/soap
+
+Headers:
+
+Content-Type: text/xml; charset=UTF-8
+Тело запроса (XML):
+Важно: Пространство имен xmlns="http://localhost/api/soap" должно совпадать с настройками сервера.
+
+xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+    <Body>
+        <createOrder xmlns="http://localhost/api/soap">
+            <data>
+                <name>SOAP Test Order</name>
+                <client_name>Ivan</client_name>
+                <client_surname>Petrov</client_surname>
+                <email>ivan.petrov@example.com</email>
+                <city>Kyiv</city>
+                <delivery>150.50</delivery>
+                <status>1</status>
+            </data>
+        </createOrder>
+    </Body>
+</Envelope>
+
+Пример ответа (200 OK):
+
+xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+  <SOAP-ENV:Body>
+    <ns1:createOrderResponse>
+      <return>
+        <status>success</status>
+        <order_id>123</order_id>
+        <message>Order created via SOAP</message>
+      </return>
+    </ns1:createOrderResponse>
+  </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+Ошибки валидации (SOAP Fault):
+Если данные не прошли валидацию (например, неверный Email), вернется SOAP-ENV:Fault.
+
+Тестирование
+
+Запуск полного набора тестов:
+
+docker-compose exec app php artisan test
+
+База данных
+
+Проект использует оптимизированную схему БД:
+
+Используются типы DECIMAL для денежных значений.
+Статусы и типы данных хранятся как TINYINT UNSIGNED (0-255) для экономии места.
+Настроены Foreign Keys для целостности данных.
+Поддерживается полнотекстовый поиск.
+Дамп находится в файле dump.sql.
